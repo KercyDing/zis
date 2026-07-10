@@ -18,6 +18,11 @@ pub fn build(b: *std.Build) void {
             .{ .name = "command", .module = command_dep.module("command") },
         },
     });
+
+    exe_mod.addAnonymousImport("zis_source", .{
+        .root_source_file = b.path("zis.ziggy"),
+    });
+
     const exe = b.addExecutable(.{
         .name = "zis",
         .root_module = exe_mod,

@@ -1,0 +1,44 @@
+.{
+    .name = "zis",
+    .version = "0.0.1",
+    .about = "A tiny tool for better control over your Zig projects.",
+    .commands = [
+        .{
+            .name = "fetch",
+            .about = "Fetch a package via URL",
+            .args = [
+                // Usage:
+                // zis fetch <url>
+                .positional(.{
+                    .id = "url",
+                    .help = "Package repository URL",
+                    .required = true,
+                }),
+                // Usage:
+                // zis fetch <url> --force
+                // or:
+                // zis fetch <url> -f
+                .flag(.{
+                    .id = "force",
+                    .short = "f",
+                    .help = "Overwrite existing files",
+                }),
+            ],
+        },
+        .{
+            .name = "init",
+            .about = "Initialize a project from a template",
+            .args = [
+                // Usage:
+                // zis init --path <PATH>
+                // or:
+                // zis init -p <PATH>
+                .option(.{
+                    .id = "path",
+                    .short = "p",
+                    .help = "Template directory",
+                }),
+            ],
+        },
+    ],
+}

@@ -5,10 +5,18 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const ziggy_dep = b.dependency("ziggy", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
     const command_mod = b.addModule("command", .{
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
+        .imports = &.{
+            .{ .name = "ziggy", .module = ziggy_dep.module("ziggy") },
+        },
     });
 
     const command_tests = b.addTest(.{

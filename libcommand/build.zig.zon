@@ -1,6 +1,12 @@
 .{
     .name = .libcommand,
     .version = "0.0.1",
+    .dependencies = .{
+        .ziggy = .{
+            .url = "git+https://github.com/kristoff-it/ziggy.git#7b81a7f1c9e6b22aacd7060b17bb6b7142878cd8",
+            .hash = "ziggy-0.1.0-kTg8vxOeBwCS6RxeI2quMQ7PCnCSWWB3Q-NF-JOktWrN",
+        },
+    },
     .minimum_zig_version = "0.17.0-dev.1282+c0f9b51d8",
     .paths = .{
         "build.zig",

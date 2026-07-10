@@ -1,0 +1,52 @@
+!label false
+
+% Build the zis.
+b():
+    zig build
+    echo 'zis has been built.'
+
+% Run the zis.
+r():
+    zig build run
+
+% Clean the zis.
+c():
+    echo 'Cleaning zis...'
+    rm -rf .zig-cache zig-out
+    echo 'zis has been cleaned.'
+
+% Cleaned running for zis.
+cr() & c:
+    zig build run
+
+% Format codebase.
+f():
+    zig fmt .
+    echo 'Formatted.'
+
+% Build all.
+ba() & b & lib.b:
+    echo 'All done.'
+
+% Clean all.
+ca() & c & lib.c:
+    echo 'All done.'
+
+% Lib command.
+[lib]
+% Build the lib.
+b():
+    cd libcommand && zig build
+    cd ..
+    echo 'lib has been built.'
+
+% Run the lib tests.
+t():
+    cd libcommand && zig build test
+    cd ..
+
+% Clean the lib.
+c():
+    echo 'Cleaning libcommand...'
+    rm -rf libcommand/.zig-cache libcommand/zig-out
+    echo 'lib has been cleaned.'

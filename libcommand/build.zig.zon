@@ -1,0 +1,13 @@
+.{
+    .name = .libcommand,
+    .version = "0.0.1",
+    .minimum_zig_version = "0.17.0-dev.1282+c0f9b51d8",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        "README.md",
+    },
+    .fingerprint = 0x59f9291b9d993b25,
+}

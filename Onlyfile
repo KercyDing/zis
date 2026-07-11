@@ -1,51 +1,42 @@
-!label false
+# Run ths zis with args.
+// Example:
+// only r fetch https://code.kercy666.com/Kercy/zis.git
+r(args..):
+    zig build run -- {{ args }}
 
-% Build the zis.
-b():
-    zig build
-    echo 'zis has been built.'
+# Test the zis.
+t():
+    zig build test
+    echo 'zis passed all the tests.'
 
-% Run the zis.
-r():
-    zig build run
+# Publish the zis.
+p():
+    zig build -Doptimize=ReleaseFast
+    echo 'zis has been published.'
 
-% Clean the zis.
+# Clean the zis.
 c():
     echo 'Cleaning zis...'
     rm -rf .zig-cache zig-out
     echo 'zis has been cleaned.'
 
-% Cleaned running for zis.
-cr() & c:
-    zig build run
-
-% Format codebase.
+# Format codebase.
 f():
-    zig fmt .
+    zig fmt src/ libcommand/
     echo 'Formatted.'
 
-% Build all.
-ba() & b & lib.b:
-    echo 'All done.'
-
-% Clean all.
+# Clean all.
 ca() & c & lib.c:
     echo 'All done.'
 
-% Lib command.
+# Lib command.
 [lib]
-% Build the lib.
-b():
-    cd libcommand && zig build
-    cd ..
-    echo 'lib has been built.'
-
-% Run the lib tests.
+# Run the lib tests.
 t():
     cd libcommand && zig build test
     cd ..
 
-% Clean the lib.
+# Clean the lib.
 c():
     echo 'Cleaning libcommand...'
     rm -rf libcommand/.zig-cache libcommand/zig-out

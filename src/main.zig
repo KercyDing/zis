@@ -34,10 +34,10 @@ pub fn main(init: std.process.Init) !void {
     };
 
     const result = maybe_result orelse {
+        //TODO: show the help.
         std.debug.print(
             \\No command provided.
-            \\Try some arguments?
-            \\TODO: show the help.
+            \\Try with some arguments?
             \\
         , .{});
         return;

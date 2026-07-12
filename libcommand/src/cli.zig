@@ -35,8 +35,8 @@ pub const CommandConfig = struct {
     /// Arguments owned by this command.
     args: []const ArgConfig = &.{},
 
-    /// Nested subcommands.
-    commands: []const CommandConfig = &.{},
+    // TODO: subcommands for subcommands.
+    // commands: []const CommandConfig = &.{},
 };
 
 pub const ArgConfig = union(enum) {
@@ -76,11 +76,6 @@ pub const PositionalConfig = struct {
     ///
     /// zis add <file1> <file2>...
     multiple: bool = false,
-
-    /// Overrides the value name shown in help output.
-    ///
-    /// When null, it is derived from `id`.
-    value_name: ?[]const u8 = null,
 };
 
 pub const FlagConfig = struct {
@@ -99,11 +94,6 @@ pub const FlagConfig = struct {
     ///
     /// .short = "f"
     short: ?[]const u8 = null,
-
-    /// Overrides the long option name.
-    ///
-    /// When null, `id` is used.
-    long: ?[]const u8 = null,
 
     /// Help message shown for this flag.
     help: []const u8 = "",
@@ -133,16 +123,6 @@ pub const OptionConfig = struct {
 
     /// Optional short option name.
     short: ?[]const u8 = null,
-
-    /// Overrides the long option name.
-    ///
-    /// When null, `id` is used.
-    long: ?[]const u8 = null,
-
-    /// Overrides the value name shown in help output.
-    ///
-    /// When null, it is derived from `id`.
-    value_name: ?[]const u8 = null,
 
     /// Help message shown for this option.
     help: []const u8 = "",

@@ -4,72 +4,43 @@ const command = @import("command");
 const zis_source = @embedFile("zis_source");
 
 pub fn main(init: std.process.Init) !void {
-    const config = try command.parseConfig(
-        init.arena.allocator(),
+    const allocator = init.arena.allocator();
+
+    const cli_config = try command.parseSource(
+        allocator,
         zis_source,
     );
 
-    std.debug.print(
-        \\{s} {s}
-        \\{s}
-        \\
-    ,
-        .{
-            config.name,
-            config.version orelse "unknown",
-            config.about,
-        },
-    );
+    const args = try init.minimal.args.toSlice(allocator);
 
-    const fetch = command.findCommand(&config, "fetch") orelse {
-        std.debug.print("fetch command not found\n", .{});
-        return error.CommandNotFound;
+    const maybe_result = command.parseArgs(
+        allocator,
+        &cli_config,
+        args,
+    ) catch |err| switch (err) {
+        error.CommandNotFound => {
+            std.debug.print("Unknown command: {s}\n", .{args[1]});
+            return;
+        },
+        error.ArgumentNotFound => {
+            std.debug.print("Unknown argument.\n", .{});
+            return;
+        },
+        error.MissingOptionValue => {
+            std.debug.print("Option requires a value.\n", .{});
+            return;
+        },
+        else => return err,
     };
 
-    std.debug.print(
-        \\command: {s}
-        \\about: {s}
-        \\
-    ,
-        .{
-            fetch.name,
-            fetch.about,
-        },
-    );
-
-    const url = command.findArg(fetch, "url") orelse {
-        std.debug.print("url argument not found\n", .{});
-        return error.ArgumentNotFound;
+    const result = maybe_result orelse {
+        std.debug.print("No command provided.\n", .{});
+        return;
     };
 
-    switch (url.*) {
-        .positional => |arg| {
-            std.debug.print(
-                "positional: {s}, required={}\n",
-                .{ arg.id, arg.required },
-            );
-        },
-        else => return error.UnexpectedArgumentType,
-    }
+    const url = result.positional("url") orelse return error.MissingUrl;
 
-    const force = command.findArg(fetch, "force") orelse {
-        std.debug.print("force argument not found\n", .{});
-        return error.ArgumentNotFound;
-    };
+    const force = result.flag("force");
 
-    switch (force.*) {
-        .flag => |flag| {
-            std.debug.print(
-                "flag: --{s}",
-                .{flag.long orelse flag.id},
-            );
-
-            if (flag.short) |short| {
-                std.debug.print(" (-{s})", .{short});
-            }
-
-            std.debug.print("\n", .{});
-        },
-        else => return error.UnexpectedArgumentType,
-    }
+    std.debug.print("url={s}, force={}\n", .{ url, force });
 }

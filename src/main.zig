@@ -19,28 +19,35 @@ pub fn main(init: std.process.Init) !void {
         args,
     ) catch |err| switch (err) {
         error.CommandNotFound => {
-            std.debug.print("Unknown command: {s}\n", .{args[1]});
+            std.log.err("Unknown command: {s}\n", .{args[1]});
             return;
         },
         error.ArgumentNotFound => {
-            std.debug.print("Unknown argument.\n", .{});
+            std.log.err("Unknown argument.\n", .{});
             return;
         },
         error.MissingOptionValue => {
-            std.debug.print("Option requires a value.\n", .{});
+            std.log.err("Option requires a value.\n", .{});
             return;
         },
         else => return err,
     };
 
     const result = maybe_result orelse {
-        std.debug.print("No command provided.\n", .{});
+        std.debug.print(
+            \\No command provided.
+            \\Try some arguments?
+            \\TODO: show the help.
+            \\
+        , .{});
         return;
     };
 
-    const url = result.positional("url") orelse return error.MissingUrl;
+    if (result.positional("url")) |url| {
+        std.debug.print("url={s}\n", .{url});
+    }
 
     const force = result.flag("force");
 
-    std.debug.print("url={s}, force={}\n", .{ url, force });
+    std.debug.print("force={}\n", .{force});
 }

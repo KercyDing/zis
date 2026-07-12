@@ -123,14 +123,7 @@ pub fn parseArgs(
     if (args.len <= 1) return null;
 
     const cmd_name: []const u8 = args[1];
-    const cmd_config = findCommand(cli_config, cmd_name) catch {
-        const fmt = try std.fmt.allocPrint(
-            allocator,
-            "There is no command called \"{s}\"",
-            .{cmd_name},
-        );
-        @panic(fmt);
-    };
+    const cmd_config = try findCommand(cli_config, cmd_name);
 
     if (args.len == 2) return .{
         .command_config = cmd_config,
@@ -303,7 +296,7 @@ inline fn stripHyphen(name: []const u8) []const u8 {
 }
 
 // ========== Tests ==========
-test "findCommand : error : no command" {
+test "findCommand : error : unknown command" {
     const cmd_a: CommandConfig = .{
         .name = "init",
         .about = "for init",
@@ -319,7 +312,7 @@ test "findCommand : error : no command" {
     };
 
     try std.testing.expectError(
-        ParseError.CmdNotExist,
+        ParseError.CommandNotFound,
         findCommand(&cli_config, "find"),
     );
 }

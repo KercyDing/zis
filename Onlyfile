@@ -1,6 +1,6 @@
 # Run ths zis with args.
 // Example:
-// only r fetch https://code.kercy666.com/Kercy/zis.git
+// only r fetch https://github.com/KercyDing/zis
 r(args..):
     zig build run -- {{ args }}
 

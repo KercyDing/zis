@@ -10,12 +10,12 @@ A tiny tool for better control over your Zig projects.
 ## Usage
 
 ```bash
-zig build run -- fetch https://code.kercy666.com/Kercy/zis.git --force
+zig build run -- fetch https:/code.kercy666.com/Kercy/zis
 # or:
-# only r fetch https://code.kercy666.com/Kercy/zis.git --force
+# only r fetch https:/code.kercy666.com/Kercy/zis
 ```
 
-Yeah actually it prints the message and does nothing...
+Yeah actually it just gets the header like `curl -I`.
 
 ## A Few Thoughts
 

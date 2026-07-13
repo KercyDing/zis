@@ -11,6 +11,12 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const curl_dep = b.dependency("curl", .{
+        .target = target,
+        .optimize = optimize,
+        .link_vendor = false,
+    });
+
     const exe_mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
@@ -18,11 +24,15 @@ pub fn build(b: *std.Build) void {
         .strip = strip,
         .imports = &.{
             .{ .name = "command", .module = command_dep.module("command") },
+            .{ .name = "curl", .module = curl_dep.module("curl") },
         },
     });
 
+    exe_mod.linkSystemLibrary("curl", .{});
+
     exe_mod.addAnonymousImport("zis_source", .{
         .root_source_file = b.path("zis.ziggy"),
+        .link_libc = true,
     });
 
     const exe = b.addExecutable(.{

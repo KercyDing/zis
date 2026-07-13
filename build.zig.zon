@@ -6,6 +6,10 @@
         .libcommand = .{
             .path = "libcommand",
         },
+        .curl = .{
+            .url = "git+https://github.com/jiacai2050/zig-curl.git#f701e602d962e149338521e9848528a372c05966",
+            .hash = "curl-0.5.1-P4tT4VsCAQBQ_kA6SBylS7sDyKXdcnuv-13p21ZNx8Az",
+        },
     },
     .paths = .{
         "build.zig",

@@ -10,8 +10,8 @@ t():
     echo 'zis passed all the tests.'
 
 # Publish the zis.
-p():
-    zig build -Doptimize=ReleaseFast -Dstrip=true
+p(static="false"):
+    zig build -Doptimize=ReleaseFast -Dstrip=true -Dstatic={{ static }}
     echo 'zis has been published.'
 
 # Clean the zis.

@@ -1,6 +1,4 @@
-const std = @import("std");
-
-pub const CliConfig = struct {
+pub const Cli = struct {
     /// Program name, for example: "zis".
     name: []const u8,
 
@@ -16,13 +14,13 @@ pub const CliConfig = struct {
     /// Top-level arguments, for example:
     ///
     /// zis --verbose
-    args: []const ArgConfig = &.{},
+    args: []const Arg = &.{},
 
     /// Available subcommands.
-    commands: []const CommandConfig = &.{},
+    commands: []const Command = &.{},
 };
 
-pub const CommandConfig = struct {
+pub const Command = struct {
     /// Command name, for example: "fetch".
     name: []const u8,
 
@@ -33,32 +31,32 @@ pub const CommandConfig = struct {
     long_about: ?[]const u8 = null,
 
     /// Arguments owned by this command.
-    args: []const ArgConfig = &.{},
+    args: []const Arg = &.{},
 
     // TODO: subcommands for subcommands.
-    // commands: []const CommandConfig = &.{},
+    // commands: []const Command = &.{},
 };
 
-pub const ArgConfig = union(enum) {
+pub const Arg = union(enum) {
     /// Positional argument:
     ///
     /// zis fetch <url>
-    positional: PositionalConfig,
+    positional: Positional,
 
     /// Boolean flag:
     ///
     /// --force
     /// -f
-    flag: FlagConfig,
+    flag: Flag,
 
     /// Option that accepts a value:
     ///
     /// --path DIR
     /// -p DIR
-    option: OptionConfig,
+    option: Option,
 };
 
-pub const PositionalConfig = struct {
+pub const Positional = struct {
     /// Internal identifier.
     ///
     /// It is also used as the default value name in help output.
@@ -78,7 +76,7 @@ pub const PositionalConfig = struct {
     multiple: bool = false,
 };
 
-pub const FlagConfig = struct {
+pub const Flag = struct {
     /// Internal identifier.
     ///
     /// It is also used as the default long option name.
@@ -111,7 +109,7 @@ pub const FlagConfig = struct {
     multiple: bool = false,
 };
 
-pub const OptionConfig = struct {
+pub const Option = struct {
     /// Internal identifier.
     ///
     /// It is also used as the default long option name.

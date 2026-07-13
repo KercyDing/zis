@@ -11,6 +11,10 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
+    const command_codegen = command_dep.artifact("command-codegen");
+    const generate_schema = b.addRunArtifact(command_codegen);
+    generate_schema.addFileArg(b.path("zis.ziggy"));
+    const generated_schema = generate_schema.addOutputFileArg("zis_schema.zig");
 
     const curl_dep = b.dependency("curl", .{
         .target = target,
@@ -36,10 +40,13 @@ pub fn build(b: *std.Build) void {
         exe_mod.linkSystemLibrary("curl", .{});
     }
 
-    exe_mod.addAnonymousImport("zis_source", .{
-        .root_source_file = b.path("zis.ziggy"),
-        .link_libc = true,
+    const schema_mod = b.createModule(.{
+        .root_source_file = generated_schema,
+        .imports = &.{
+            .{ .name = "command", .module = command_dep.module("command") },
+        },
     });
+    exe_mod.addImport("zis_schema", schema_mod);
 
     const exe = b.addExecutable(.{
         .name = "zis",

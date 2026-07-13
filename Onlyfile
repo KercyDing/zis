@@ -29,6 +29,11 @@ f():
 ca() & c & lib.c:
     echo 'All done.'
 
+# Commit all.
+cmt(content..):
+    git add -A && git commit -m "{{ content }}"
+    git log --oneline -5
+
 # Lib command.
 [lib]
 # Run the lib tests.

@@ -1,27 +1,16 @@
-// =============== Mods ===============
-const std = @import("std");
-
-const constants = @import("constants.zig");
-const cli = @import("cli.zig");
-const parse = @import("parse.zig");
+const schema = @import("schema.zig");
+const gen = @import("gen.zig");
 
 // =============== Types ===============
-const CliConfig = cli.CliConfig;
-const CommandConfig = cli.CommandConfig;
-const ArgConfig = cli.ArgConfig;
+pub const Cli = schema.Cli;
+pub const Command = schema.Command;
+pub const Arg = schema.Arg;
 
-const ParseResult = parse.ParseResult;
-
-// =============== Functions ===============
-pub const parseSource = parse.parseSource;
-pub const parseArgs = parse.parseArgs;
-
-pub const findCommand = parse.findCommand;
-pub const findArg = parse.findArg;
+pub const Generate = gen.Generate;
+pub const ParseError = gen.ParseError;
 
 // =============== Tests ===============
 test {
-    _ = constants;
-    _ = cli;
-    _ = parse;
+    _ = schema;
+    _ = gen;
 }

@@ -14,19 +14,37 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/root.zig"),
         .target = target,
         .optimize = optimize,
-        .imports = &.{
-            .{ .name = "ziggy", .module = ziggy_dep.module("ziggy") },
-        },
     });
 
-    const command_tests = b.addTest(.{
+    const schema_mod = b.createModule(.{
+        .root_source_file = b.path("src/schema.zig"),
+        .target = b.graph.host,
+        .optimize = .Debug,
+    });
+
+    const codegen_mod = b.createModule(.{
+        .root_source_file = b.path("codegen/main.zig"),
+        .target = b.graph.host,
+        .optimize = .Debug,
+        .imports = &.{
+            .{ .name = "ziggy", .module = ziggy_dep.module("ziggy") },
+            .{ .name = "schema", .module = schema_mod },
+        },
+    });
+    const codegen = b.addExecutable(.{
+        .name = "command-codegen",
+        .root_module = codegen_mod,
+    });
+    b.installArtifact(codegen);
+
+    const test_mod = b.addTest(.{
         .root_module = command_mod,
     });
 
-    const run_command_tests = b.addRunArtifact(command_tests);
+    const run_tests = b.addRunArtifact(test_mod);
 
     const test_step = b.step("test", "Run libcommand tests");
-    test_step.dependOn(&run_command_tests.step);
+    test_step.dependOn(&run_tests.step);
 }
 
 comptime {

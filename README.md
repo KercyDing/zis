@@ -4,7 +4,7 @@ A tiny tool for better control over your Zig projects.
 
 ## Prerequisites
 
-- **[Zig](https://ziglang.org/download)** (>=`0.17.0-dev.1387+01b60634c`)
+- **[Zig](https://ziglang.org/download)** (master)
 - [Only](https://github.com/KercyDing/only) (task runner if you like)
 
 ## Usage

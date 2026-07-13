@@ -60,5 +60,5 @@ fn runFetch(
 
 // TODO: implement init logic.
 fn runInit() !void {
-    std.debug.print("Have not done it yet.", .{});
+    std.debug.print("Have not done it yet.\n", .{});
 }

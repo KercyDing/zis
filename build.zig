@@ -19,8 +19,8 @@ pub fn build(b: *std.Build) void {
     const curl_dep = b.dependency("curl", .{
         .target = target,
         .optimize = optimize,
-        // Static linking would make the size of bin too big!(500 KB -> 7 MB)
-        // Dynamic linking would affect performance.(700 us -> 3 ms)
+        // Static linking would make the size of bin too big!
+        // Dynamic linking would affect a little of performance.
         // So the default setting is dynamic.
         .link_vendor = static,
     });

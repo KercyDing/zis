@@ -1,1 +1,1 @@
-pub const ARG_LENGTH_MAX: usize = 256;
+pub const ARG_COUNT_MAX: usize = 64;

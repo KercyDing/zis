@@ -13,6 +13,7 @@ pub const ParseError = error{
     CommandNotFound,
     ArgumentNotFound,
     MissingOptionValue,
+    TooManyArguments,
 };
 
 pub const ParseResult = struct {
@@ -172,7 +173,7 @@ pub fn parseCommandArgs(
         switch (found) {
             .positional => {
                 positional_index += 1;
-                result.append(allocator, .{
+                appendParsedArg(allocator, &result, .{
                     .positional = .{
                         .id = found.positional.id,
                         .value = raw,
@@ -181,7 +182,7 @@ pub fn parseCommandArgs(
                 i += 1;
             },
             .flag => {
-                try result.append(allocator, .{
+                try appendParsedArg(allocator, &result, .{
                     .flag = .{
                         .id = found.flag.id,
                     },
@@ -198,7 +199,7 @@ pub fn parseCommandArgs(
                     return ParseError.MissingOptionValue;
                 }
 
-                try result.append(allocator, .{
+                try appendParsedArg(allocator, &result, .{
                     .option = .{
                         .id = found.option.id,
                         .value = next,
@@ -230,6 +231,22 @@ inline fn findNamedArg(
     }
 
     return null;
+}
+
+/// Append ParsedArg into ArrayList.
+///
+/// Return TooManyArguments when too long.
+fn appendParsedArg(
+    allocator: std.mem.Allocator,
+    result: *std.ArrayList(ParsedArg),
+    arg: ParsedArg,
+) ParseError!void {
+    if (result.items.len >= constants.ARG_COUNT_MAX) {
+        return ParseError.TooManyArguments;
+    }
+
+    result.append(allocator, arg) catch
+        return ParseError.OutOfMemory;
 }
 
 /// Find the next positional argument of the command.

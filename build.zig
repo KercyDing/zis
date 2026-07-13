@@ -4,6 +4,7 @@ const builtin = @import("builtin");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const strip = b.option(bool, "strip", "Strip debug symbols") orelse false;
 
     const command_dep = b.dependency("libcommand", .{
         .target = target,
@@ -14,6 +15,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
+        .strip = strip,
         .imports = &.{
             .{ .name = "command", .module = command_dep.module("command") },
         },

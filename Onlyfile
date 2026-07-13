@@ -11,7 +11,7 @@ t():
 
 # Publish the zis.
 p():
-    zig build -Doptimize=ReleaseFast
+    zig build -Doptimize=ReleaseFast -Dstrip=true
     echo 'zis has been published.'
 
 # Clean the zis.

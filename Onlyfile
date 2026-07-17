@@ -1,47 +1,46 @@
-# Run ths zis with args.
+# Build and run the zis with args
 // Example:
-// only r fetch https:/code.kercy666.com/Kercy/zis
-r(args..):
+// only br fetch https://github.com/opencv/opencv/archive/refs/tags/5.0.0.tar.gz
+br(args..):
     zig build run -- {{ args }}
 
-# Test the zis.
-t():
-    zig build test
-    echo 'zis passed all the tests.'
+# Publish and run the zis with args
+pr(args..) & p:
+    ./zig-out/bin/zis {{ args }}
 
-# Publish the zis.
+# Publish the zis
 p(static="false"):
     zig build -Doptimize=ReleaseFast -Dstrip=true -Dstatic={{ static }}
     echo 'zis has been published.'
 
-# Clean the zis.
+# Test the zis
+t():
+    zig build test
+    echo 'zis passed all the tests.'
+
+# Clean the zis
 c():
     echo 'Cleaning zis...'
     rm -rf .zig-cache zig-out
     echo 'zis has been cleaned.'
 
-# Format codebase.
+# Format codebase
 f():
     zig fmt src/ libcommand/
     echo 'Formatted.'
 
-# Clean all.
+# Clean all
 ca() & c & lib.c:
     echo 'All done.'
 
-# Commit all.
-cmt(content..):
-    git add -A && git commit -m "{{ content }}"
-    git log --oneline -5
-
-# Lib command.
+# Lib command
 [lib]
 # Run the lib tests.
 t():
     cd libcommand && zig build test
     cd ..
 
-# Clean the lib.
+# Clean the lib
 c():
     echo 'Cleaning libcommand...'
     rm -rf libcommand/.zig-cache libcommand/zig-out

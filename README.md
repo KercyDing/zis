@@ -12,10 +12,8 @@ A tiny tool for better control over your Zig projects.
 ```bash
 zig build run -- fetch https:/code.kercy666.com/Kercy/zis
 # or:
-# only r fetch https:/code.kercy666.com/Kercy/zis
+# only br fetch https:/code.kercy666.com/Kercy/zis
 ```
-
-Yeah actually it just gets the header like `curl -I`.
 
 ## A Few Thoughts
 

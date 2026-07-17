@@ -1,7 +1,7 @@
 .{
     .name = .zis,
     .version = "0.0.1",
-    .minimum_zig_version = "0.17.0-dev.1397+4331ba0fb",
+    .minimum_zig_version = "0.17.0-dev.1415+64dfaa568",
     .dependencies = .{
         .libcommand = .{
             .path = "libcommand",

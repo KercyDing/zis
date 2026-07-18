@@ -10,9 +10,9 @@ A tiny tool for better control over your Zig projects.
 ## Usage
 
 ```bash
-zig build run -- fetch https:/code.kercy666.com/Kercy/zis
+zig build run -- fetch https://github.com/opencv/opencv/archive/refs/tags/5.0.0.tar.gz
 # or:
-# only br fetch https:/code.kercy666.com/Kercy/zis
+# only br fetch https://github.com/opencv/opencv/archive/refs/tags/5.0.0.tar.gz
 ```
 
 ## A Few Thoughts

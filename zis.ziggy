@@ -5,7 +5,7 @@
     .commands = [
         .{
             .name = "fetch",
-            .about = "Fetch a package via URL",
+            .about = "Fetch a package and print hash",
             .args = [
                 // Usage:
                 // zis fetch <url>
@@ -15,13 +15,13 @@
                     .required = true,
                 }),
                 // Usage:
-                // zis fetch <url> --force
+                // zis fetch --save <url>
                 // or:
-                // zis fetch <url> -f
+                // zis fetch -s <url>
                 .flag(.{
-                    .id = "force",
-                    .short = "f",
-                    .help = "Overwrite existing files",
+                    .id = "save",
+                    .short = "s",
+                    .help = "Print full dependency",
                 }),
             ],
         },

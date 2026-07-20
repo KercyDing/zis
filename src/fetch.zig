@@ -114,6 +114,24 @@ pub fn runFetch(
 
     const task_dir = task.dir;
 
+    if (fetch.save) {
+        const init_result = try std.process.run(allocator, io, .{
+            .argv = &.{ "zig", "init" },
+            .cwd = .{ .dir = task_dir },
+            .stdout_limit = .limited(4096),
+            .stderr_limit = .limited(64 * 1024),
+        });
+        defer allocator.free(init_result.stdout);
+        defer allocator.free(init_result.stderr);
+
+        if (!init_result.term.success()) {
+            if (init_result.stderr.len != 0) {
+                std.debug.print("{s}", .{init_result.stderr});
+            }
+            return error.ZigInitFailed;
+        }
+    }
+
     const archive_path = try std.fmt.allocPrint(
         allocator,
         "./{s}",
@@ -162,20 +180,69 @@ pub fn runFetch(
     committed = true;
 
     // Let Zig to take it over.
-    var child = try std.process.spawn(
-        io,
-        .{
-            .argv = &.{ "zig", "fetch", archive_path },
-            .cwd = .{ .dir = task_dir },
-        },
-    );
+    const argv: []const []const u8 = if (fetch.save)
+        &.{ "zig", "fetch", "--save", archive_path }
+    else
+        &.{ "zig", "fetch", archive_path };
 
-    const term = try child.wait(io);
+    const result = try std.process.run(allocator, io, .{
+        .argv = argv,
+        .cwd = .{ .dir = task_dir },
+        .stdout_limit = .limited(4096),
+        .stderr_limit = .limited(64 * 1024),
+    });
+    defer allocator.free(result.stdout);
+    defer allocator.free(result.stderr);
 
-    if (!term.success()) {
-        std.log.err("zig fetch failed: {f}", .{term});
+    if (!result.term.success()) {
+        if (result.stderr.len != 0) {
+            std.debug.print("{s}", .{result.stderr});
+        }
         return error.ZigFetchFailed;
     }
+
+    if (!fetch.save) {
+        const hash = std.mem.trim(u8, result.stdout, " \t\r\n");
+        std.debug.print("{s}\n", .{hash});
+        return;
+    }
+
+    // save == true
+    var zon_file = try task_dir.openFile(io, "build.zig.zon", .{});
+    defer zon_file.close(io);
+
+    const zon_stat = try zon_file.stat(io);
+
+    const zon_size = std.math.cast(usize, zon_stat.size) orelse
+        return error.GeneratedManifestTooLarge;
+
+    if (zon_size > 64 * 1024) {
+        return error.GeneratedManifestTooLarge;
+    }
+
+    const zon_source = try allocator.allocSentinel(u8, zon_size, 0);
+    defer allocator.free(zon_source);
+
+    var zon_reader = zon_file.reader(io, &.{});
+    try zon_reader.interface.readSliceAll(zon_source);
+
+    var dependency = try dependencyFromZon(
+        allocator,
+        zon_source,
+    );
+    defer dependency.deinit(allocator);
+
+    std.debug.print(
+        \\.{s} = .{{
+        \\    .url = "{f}",
+        \\    .hash = "{s}",
+        \\}},
+        \\
+    , .{
+        dependency.name,
+        std.zig.fmtString(fetch.url),
+        dependency.hash,
+    });
 }
 
 /// Open the temporary directory of the system.
@@ -191,6 +258,116 @@ fn openSystemTempDir(io: std.Io, environ: *const std.process.Environ.Map) !std.I
     }
 
     return std.Io.Dir.openDirAbsolute(io, temp_path, .{}) catch return error.OpenTempDirFailed;
+}
+
+const Dependency = struct {
+    name: []u8,
+    hash: []u8,
+
+    fn deinit(self: *Dependency, allocator: std.mem.Allocator) void {
+        allocator.free(self.name);
+        allocator.free(self.hash);
+        self.* = undefined;
+    }
+};
+
+fn dependencyFromZon(
+    allocator: std.mem.Allocator,
+    source: [:0]const u8,
+) !Dependency {
+    var ast = try std.zig.Ast.parse(
+        allocator,
+        source,
+        .{ .mode = .zon },
+    );
+    defer ast.deinit(allocator);
+
+    if (ast.errors.len != 0) {
+        return error.InvalidGeneratedManifest;
+    }
+
+    const root_node = ast.nodeData(.root).node;
+
+    var root_buffer: [2]std.zig.Ast.Node.Index = undefined;
+    const root = ast.fullStructInit(
+        &root_buffer,
+        root_node,
+    ) orelse return error.InvalidGeneratedManifest;
+
+    for (root.ast.fields) |field_node| {
+        const field_name_token = ast.firstToken(field_node) - 2;
+        const field_name = ast.tokenSlice(field_name_token);
+
+        if (!std.mem.eql(u8, field_name, "dependencies")) {
+            continue;
+        }
+
+        var dependencies_buffer: [2]std.zig.Ast.Node.Index = undefined;
+        const dependencies = ast.fullStructInit(
+            &dependencies_buffer,
+            field_node,
+        ) orelse return error.InvalidGeneratedManifest;
+
+        if (dependencies.ast.fields.len != 1) {
+            return error.UnexpectedDependencyCount;
+        }
+
+        const dependency_node = dependencies.ast.fields[0];
+
+        const name_token = ast.firstToken(dependency_node) - 2;
+        const name = ast.tokenSlice(name_token);
+
+        var dependency_buffer: [2]std.zig.Ast.Node.Index = undefined;
+        const dependency_init = ast.fullStructInit(
+            &dependency_buffer,
+            dependency_node,
+        ) orelse return error.InvalidGeneratedManifest;
+
+        var hash: ?[]const u8 = null;
+
+        for (dependency_init.ast.fields) |member_node| {
+            const member_name_token = ast.firstToken(member_node) - 2;
+            const member_name = ast.tokenSlice(member_name_token);
+
+            if (!std.mem.eql(u8, member_name, "hash")) {
+                continue;
+            }
+
+            if (ast.nodeTag(member_node) != .string_literal) {
+                return error.InvalidGeneratedManifest;
+            }
+
+            const hash_literal = ast.tokenSlice(
+                ast.nodeMainToken(member_node),
+            );
+
+            if (hash_literal.len < 2 or
+                hash_literal[0] != '"' or
+                hash_literal[hash_literal.len - 1] != '"')
+            {
+                return error.InvalidGeneratedManifest;
+            }
+
+            hash = hash_literal[1 .. hash_literal.len - 1];
+            break;
+        }
+
+        const hash_value = hash orelse
+            return error.DependencyHashNotFound;
+
+        const owned_name = try allocator.dupe(u8, name);
+        errdefer allocator.free(owned_name);
+
+        const owned_hash = try allocator.dupe(u8, hash_value);
+        errdefer allocator.free(owned_hash);
+
+        return .{
+            .name = owned_name,
+            .hash = owned_hash,
+        };
+    }
+
+    return error.DependencyNotFound;
 }
 
 /// Get file name from the given URL.
